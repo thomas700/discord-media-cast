@@ -1,0 +1,53 @@
+{
+  "name": "discord-media-cast",
+  "version": "1.0.0",
+  "description": "Diffusez en temps réel sur grand écran tous les médias partagés dans un salon Discord.",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "overlay": "electron overlay.js",
+    "dist": "electron-builder --win",
+    "release": "electron-builder --win --publish always"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.15.3",
+    "dotenv": "^16.4.5",
+    "electron-updater": "^6.8.3",
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "electron": "^42.2.0",
+    "electron-builder": "^25.0.0",
+    "nodemon": "^3.1.0"
+  },
+  "build": {
+    "appId": "com.discordmediacast.app",
+    "productName": "Discord Media Cast",
+    "asar": true,
+    "win": {
+      "target": "nsis",
+      "icon": "public/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "thomas700",
+      "repo": "discord-media-cast"
+    },
+    "files": [
+      "**/*",
+      "!node_modules/.cache",
+      "!dist"
+    ]
+  }
+}

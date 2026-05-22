@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discord Media Cast 📺✨</title>
+  <!-- Google Fonts: Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <!-- FontAwesome for Premium Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Custom Premium CSS -->
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+  <!-- Background Ambient Glow -->
+  <div class="ambient-backdrop" id="ambientBackdrop"></div>
+  <div class="ambient-color-overlay"></div>
+
+  <!-- Main Media Screen -->
+  <main class="theater-viewport" id="theaterViewport">
+    
+    <!-- Empty State / Idle view -->
+    <div class="idle-screen" id="idleScreen">
+      <div class="idle-logo">
+        <i class="fa-brands fa-discord discord-pulse"></i>
+      </div>
+      <h2>En attente de médias...</h2>
+      <p>Postez une image, une vidéo ou un son dans votre salon Discord pour l'afficher ici.</p>
+    </div>
+
+    <!-- Active Media Display -->
+    <div class="media-display-container hidden" id="mediaDisplayContainer">
+      
+      <!-- Meta info: Author & Origin -->
+      <div class="media-header" id="mediaHeader">
+        <img src="" alt="Avatar" class="author-avatar" id="authorAvatar">
+        <div class="author-info">
+          <span class="author-name" id="authorName">Pseudo</span>
+          <span class="action-tag" id="actionTag">a partagé un média</span>
+        </div>
+      </div>
+
+      <!-- The Media Player Frame -->
+      <div class="media-frame" id="mediaFrame">
+        <!-- Rendered media goes here (handled dynamically in JS) -->
+        <div id="imagePresenter" class="media-element hidden">
+          <img src="" alt="Direct Image" id="displayedImage">
+        </div>
+
+        <div id="videoPresenter" class="media-element hidden">
+          <video id="displayedVideo" autoplay muted loop playsinline></video>
+        </div>
+
+        <div id="audioPresenter" class="media-element hidden">
+          <div class="audio-card">
+            <div class="audio-disc-container">
+              <img src="" alt="Cover" class="audio-cover-img" id="audioCover">
+              <div class="audio-disc-center"></div>
+            </div>
+            <div class="audio-meta">
+              <h3 id="audioFilename">musique.mp3</h3>
+              <span id="audioAuthor">Auteur</span>
+            </div>
+            <!-- Audio Spectrometer Canvas -->
+            <canvas id="waveformCanvas" class="waveform-canvas"></canvas>
+            <audio id="displayedAudio" crossorigin="anonymous"></audio>
+          </div>
+        </div>
+
+        <div id="textPresenter" class="media-element hidden">
+          <div class="text-card-glow">
+            <i class="fa-solid fa-quote-left quote-icon-start"></i>
+            <p id="displayedText">Texte partagé en grand sur l'écran.</p>
+            <i class="fa-solid fa-quote-right quote-icon-end"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Attached message caption -->
+      <div class="media-caption hidden" id="mediaCaption">
+        <p id="captionText">Légende du message...</p>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Bottom Interactive Bar (Historical timeline + Controls) -->
+  <footer class="control-footer">
+    <div class="footer-left">
+      <div class="connection-pill status-disconnected" id="botStatusPill" onclick="toggleSetupModal()">
+        <span class="pill-dot"></span>
+        <span class="pill-text" id="botStatusText">Discord Déconnecté</span>
+      </div>
+    </div>
+
+    <!-- Quick history view -->
+    <div class="footer-center">
+      <div class="history-list" id="historyList">
+        <!-- populated dynamically -->
+      </div>
+    </div>
+
+    <div class="footer-right">
+      <button class="icon-btn" id="btnTestPanel" title="Panneau de Test" onclick="toggleTestPanel()">
+        <i class="fa-solid fa-flask"></i>
+      </button>
+      <button class="icon-btn" id="btnTTS" title="Synthèse Vocale (TTS) désactivée" onclick="toggleTTS()">
+        <i class="fa-solid fa-volume-xmark text-danger" id="ttsIcon"></i>
+      </button>
+      <button class="icon-btn" id="btnFullscreen" title="Plein Écran" onclick="toggleFullscreen()">
+        <i class="fa-solid fa-expand"></i>
+      </button>
+    </div>
+  </footer>
+
+  <!-- Control & Test Panel (Drawer) -->
+  <div class="slide-drawer" id="testPanel">
+    <div class="drawer-header">
+      <h3>🚀 Simulateur de Cast</h3>
+      <button class="close-btn" onclick="toggleTestPanel()">&times;</button>
+    </div>
+    <div class="drawer-body">
+      <p class="helper-text">Testez l'affichage des médias instantanément avant de lier votre bot Discord.</p>
+      
+      <div class="form-group">
+        <label for="testUser">Nom du testeur</label>
+        <input type="text" id="testUser" value="Super Testeur 🚀">
+      </div>
+
+      <div class="form-group">
+        <label for="testText">Texte / Légende</label>
+        <textarea id="testText" placeholder="Écrivez un message ici..."></textarea>
+      </div>
+
+      <div class="test-actions">
+        <button class="test-btn" onclick="triggerMockCast('text')">
+          <i class="fa-solid fa-comment-dots"></i> Texte Seul
+        </button>
+        <button class="test-btn btn-image" onclick="triggerMockCast('image')">
+          <i class="fa-solid fa-image"></i> Image
+        </button>
+        <button class="test-btn btn-video" onclick="triggerMockCast('video')">
+          <i class="fa-solid fa-video"></i> Vidéo Space
+        </button>
+        <button class="test-btn btn-audio" onclick="triggerMockCast('audio')">
+          <i class="fa-solid fa-music"></i> Musique (Onde)
+        </button>
+      </div>
+
+      <div class="form-group" style="margin-top: 1.5rem;">
+        <label>📍 Position sur l'écran</label>
+        <p class="helper-text" style="margin-top: 0; margin-bottom: 5px;">Cliquez pour déplacer l'affichage de l'overlay.</p>
+        <div class="position-grid">
+          <button class="pos-btn" onclick="setOverlayPosition('top-left')" title="Haut Gauche" id="pos-top-left"><div class="pos-btn-icon" style="align-self: flex-start; justify-self: flex-start;"></div></button>
+          <button class="pos-btn" onclick="setOverlayPosition('top-center')" title="Haut Centre" id="pos-top-center"><div class="pos-btn-icon" style="align-self: flex-start;"></div></button>
+          <button class="pos-btn" onclick="setOverlayPosition('top-right')" title="Haut Droite" id="pos-top-right"><div class="pos-btn-icon" style="align-self: flex-start; justify-self: flex-end;"></div></button>
+          
+          <button class="pos-btn" onclick="setOverlayPosition('middle-left')" title="Milieu Gauche" id="pos-middle-left"><div class="pos-btn-icon" style="justify-self: flex-start;"></div></button>
+          <button class="pos-btn active" onclick="setOverlayPosition('center')" title="Centre" id="pos-center"><div class="pos-btn-icon"></div></button>
+          <button class="pos-btn" onclick="setOverlayPosition('middle-right')" title="Milieu Droite" id="pos-middle-right"><div class="pos-btn-icon" style="justify-self: flex-end;"></div></button>
+          
+          <button class="pos-btn" onclick="setOverlayPosition('bottom-left')" title="Bas Gauche" id="pos-bottom-left"><div class="pos-btn-icon" style="align-self: flex-end; justify-self: flex-start;"></div></button>
+          <button class="pos-btn" onclick="setOverlayPosition('bottom-center')" title="Bas Centre" id="pos-bottom-center"><div class="pos-btn-icon" style="align-self: flex-end;"></div></button>
+          <button class="pos-btn" onclick="setOverlayPosition('bottom-right')" title="Bas Droite" id="pos-bottom-right"><div class="pos-btn-icon" style="align-self: flex-end; justify-self: flex-end;"></div></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Discord Setup Guide Modal -->
+  <div class="modal-overlay hidden" id="setupModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2>🛠️ Configuration du Bot Discord</h2>
+        <button class="close-btn" onclick="toggleSetupModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- Tab navigation -->
+        <div class="tab-nav">
+          <button class="tab-btn active" onclick="switchTab('tab-status')">Statut</button>
+          <button class="tab-btn" onclick="switchTab('tab-guide')">Guide Pas à Pas</button>
+          <button class="tab-btn" onclick="switchTab('tab-setup')">Éditer Config</button>
+        </div>
+
+        <!-- Tab 1: Status -->
+        <div class="tab-content" id="tab-status">
+          <div class="status-summary">
+            <div class="status-indicator">
+              <i class="fa-solid fa-circle-info" id="statusModalIcon"></i>
+              <h3 id="statusModalTitle">Configuration requise</h3>
+              <p id="statusModalDesc">Entrez votre jeton de bot et l'identifiant du salon ci-dessous.</p>
+            </div>
+
+            <div class="status-details">
+              <div class="detail-row">
+                <span>Bot en ligne :</span>
+                <span id="detailBotOnline" class="badge badge-error">Non</span>
+              </div>
+              <div class="detail-row">
+                <span>Salon surveillé :</span>
+                <span id="detailChannelName" class="badge badge-neutral">-</span>
+              </div>
+              <div class="detail-row">
+                <span>Clé Config :</span>
+                <span id="detailConfig" class="badge badge-neutral">Incomplète</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Guide Pas à pas -->
+        <div class="tab-content hidden" id="tab-guide">
+          <div class="setup-steps">
+            <div class="step-card">
+              <div class="step-num">1</div>
+              <div class="step-text">
+                <strong>Créer l'application Discord</strong>
+                <p>Rendez-vous sur le <a href="https://discord.com/developers/applications" target="_blank">Discord Developer Portal</a> et cliquez sur <strong>New Application</strong>.</p>
+              </div>
+            </div>
+            
+            <div class="step-card">
+              <div class="step-num">2</div>
+              <div class="step-text">
+                <strong>Créer le Bot & Activer les Intents</strong>
+                <p>Allez dans l'onglet <strong>Bot</strong>. Activez le paramètre <strong>Message Content Intent</strong> (Crucial pour lire les messages !) puis copiez le <strong>Token</strong> du bot.</p>
+              </div>
+            </div>
+
+            <div class="step-card">
+              <div class="step-num">3</div>
+              <div class="step-text">
+                <strong>Inviter le bot sur votre serveur</strong>
+                <p>Allez dans <strong>OAuth2 > URL Generator</strong>. Cochez <code>bot</code>. Dans les permissions du bot, cochez <code>Read Messages/View Channels</code>. Utilisez le lien généré pour inviter le bot.</p>
+              </div>
+            </div>
+
+            <div class="step-card">
+              <div class="step-num">4</div>
+              <div class="step-text">
+                <strong>Copier l'ID du Salon</strong>
+                <p>Sur Discord, activez le <i>mode développeur</i> (Paramètres > Avancés). Faites un clic droit sur le salon textuel choisi et cliquez sur <strong>Copier l'identifiant</strong>.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Setup Form -->
+        <div class="tab-content hidden" id="tab-setup">
+          <form id="configForm" onsubmit="saveConfig(event)">
+            <p class="helper-text">Remplissez ces informations. Elles seront enregistrées en mémoire pour cette session.</p>
+            
+            <div class="form-group">
+              <label for="discordToken">Token du Bot Discord</label>
+              <div class="input-password-wrapper">
+                <input type="password" id="discordToken" placeholder="MTAxNDk... (Votre Token Discord)" required autocomplete="off">
+                <button type="button" class="btn-toggle-pwd" onclick="togglePasswordVisibility()"><i class="fa-solid fa-eye"></i></button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="channelId">ID du Salon Discord (Text Channel ID)</label>
+              <input type="text" id="channelId" placeholder="102938475610293847" required>
+            </div>
+
+            <button type="submit" class="submit-btn">Sauvegarder & Connecter</button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Socket.io library -->
+  <script src="/socket.io/socket.io.js"></script>
+  <!-- Main Frontend JS -->
+  <script src="app.js?v=2"></script>
+</body>
+</html>
