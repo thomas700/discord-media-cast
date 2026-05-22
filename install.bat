@@ -120,7 +120,6 @@ schtasks /create ^
     /tn "%TASK_NAME%" ^
     /tr "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File \"%LAUNCHER_SCRIPT%\"" ^
     /sc onlogon ^
-    /rl highest ^
     /f >nul
 
 if errorlevel 1 (
