@@ -128,22 +128,20 @@ if not exist "%INSTALL_DIR%\.env" (
     echo        Fichier de configuration existant. OK
 )
 
-:: ---- Configurer le démarrage automatique via le Planificateur de tâches ----
+:: ---- Configurer le démarrage automatique via le dossier Démarrage ----
 echo  [4/4] Configuration du demarrage automatique...
 
-:: Supprimer l'ancienne tâche si elle existe
-schtasks /delete /tn "%TASK_NAME%" /f >nul 2>&1
+set "STARTUP_DIR=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup"
+set "VBS_SCRIPT=%STARTUP_DIR%\DiscordMediaCast.vbs"
 
-:: Créer la nouvelle tâche (lance launcher.ps1 au login, sans fenêtre)
-schtasks /create ^
-    /tn "%TASK_NAME%" ^
-    /tr "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File \"%LAUNCHER_SCRIPT%\"" ^
-    /sc onlogon ^
-    /f >nul
+:: Créer le script VBS qui lance le launcher PowerShell en arrière-plan (totalement invisible)
+(
+    echo Set WshShell = CreateObject^("WScript.Shell"^)
+    echo WshShell.Run "powershell.exe -ExecutionPolicy Bypass -File ""%LAUNCHER_SCRIPT%""", 0, False
+) > "%VBS_SCRIPT%"
 
 if errorlevel 1 (
-    echo  [ERREUR] Impossible de creer la tache planifiee.
-    echo  Essayez de relancer ce script en tant qu'administrateur.
+    echo  [ERREUR] Impossible de configurer le demarrage automatique.
     pause
     exit /b 1
 )
