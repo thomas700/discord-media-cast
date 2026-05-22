@@ -5,12 +5,28 @@ import { Client, GatewayIntentBits } from 'discord.js';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 // Charger les variables d'environnement
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Charger la position sauvegardée si elle existe
+let savedPosition = 'center';
+const positionFilePath = path.join(__dirname, 'position.json');
+try {
+  if (fs.existsSync(positionFilePath)) {
+    const data = JSON.parse(fs.readFileSync(positionFilePath, 'utf8'));
+    if (data && data.position) {
+      savedPosition = data.position;
+      console.log(`💾 Position restaurée depuis la sauvegarde : ${savedPosition}`);
+    }
+  }
+} catch (e) {
+  console.warn("⚠️ Impossible de lire la position sauvegardée :", e.message);
+}
 
 const app = express();
 const httpServer = createServer(app);
@@ -37,7 +53,7 @@ let botStatus = {
   error: null,
   botName: null,
   channelName: null,
-  overlayPosition: 'center', // Valeur par défaut
+  overlayPosition: savedPosition, // Utiliser la position restaurée
   configured: !!(process.env.DISCORD_TOKEN && process.env.CHANNEL_ID)
 };
 
@@ -360,6 +376,15 @@ io.on('connection', (socket) => {
   socket.on('update_position', (position) => {
     botStatus.overlayPosition = position;
     console.log(`📍 Position de l'overlay mise à jour: ${position}`);
+    
+    // Sauvegarder la position dans le fichier JSON pour qu'elle survive aux redémarrages
+    try {
+      fs.writeFileSync(positionFilePath, JSON.stringify({ position }), 'utf8');
+      console.log(`💾 Position sauvegardée dans le fichier.`);
+    } catch (e) {
+      console.error("❌ Erreur lors de la sauvegarde de la position :", e.message);
+    }
+
     // Diffuser la nouvelle position à tous les autres clients (pour que l'overlay se mette à jour instantanément)
     io.emit('position_updated', position);
   });
