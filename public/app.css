@@ -295,45 +295,25 @@ body {
 }
 
 /* --- Text Announcement Card --- */
-.text-card-glow {
-  background: var(--bg-glass-bright);
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
-  border: 1px solid var(--border-active);
-  padding: 3rem 4rem;
-  border-radius: 24px;
+.text-simple-border {
+  background: rgba(13, 17, 39, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(88, 101, 242, 0.3);
+  border-left: 4px solid var(--primary);
+  padding: 1.5rem 2.5rem;
+  border-radius: 8px;
   max-width: 800px;
-  text-align: center;
-  position: relative;
-  box-shadow: 0 0 50px var(--primary-glow), 0 20px 50px rgba(0, 0, 0, 0.5);
-  animation: textCardPulse 5s ease-in-out infinite alternate;
+  text-align: left;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
-.text-card-glow p {
-  font-size: 2.2rem;
-  font-weight: 800;
+.text-simple-border p {
+  font-size: 1.8rem;
+  font-weight: 600;
   line-height: 1.4;
-  letter-spacing: -0.5px;
-  background: linear-gradient(135deg, #ffffff 0%, var(--secondary) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.quote-icon-start, .quote-icon-end {
-  position: absolute;
-  font-size: 2rem;
-  color: var(--border-active);
-  opacity: 0.5;
-}
-
-.quote-icon-start {
-  top: 1.5rem;
-  left: 2rem;
-}
-
-.quote-icon-end {
-  bottom: 1.5rem;
-  right: 2rem;
+  color: var(--text-main);
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
 }
 
 /* Media caption block below */
