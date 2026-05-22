@@ -820,4 +820,31 @@ function quitApplication() {
   }
 }
 
+function checkForUpdates() {
+  const icon = document.getElementById('updateIcon');
+  if (icon) icon.classList.add('fa-spin');
+  
+  fetch('/api/update', { method: 'POST' })
+    .then(res => res.json())
+    .then(data => {
+      if (icon) icon.classList.remove('fa-spin');
+      if (!data.success) {
+        alert("Erreur: " + data.error);
+      } else if (data.updating) {
+        alert("Une mise à jour a été trouvée et est en cours d'installation. L'application va redémarrer dans un instant. L'écran va se recharger automatiquement.");
+        // Recharger la page après 8 secondes pour laisser le temps au redémarrage
+        setTimeout(() => {
+          window.location.reload();
+        }, 8000);
+      } else {
+        alert(data.message);
+      }
+    })
+    .catch(err => {
+      if (icon) icon.classList.remove('fa-spin');
+      console.error('Erreur lors de la vérification de mise à jour:', err);
+      alert("Impossible de vérifier les mises à jour (le serveur est peut-être éteint).");
+    });
+}
+
 

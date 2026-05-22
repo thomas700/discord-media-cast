@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import { exec, spawn } from 'child_process';
 
 // Charger les variables d'environnement
 dotenv.config();
@@ -373,6 +374,42 @@ app.post('/api/quit', (req, res) => {
   setTimeout(() => {
     process.exit(0);
   }, 1000);
+});
+
+// Route API pour vérifier et installer les mises à jour
+app.post('/api/update', (req, res) => {
+  console.log('🔄 Vérification des mises à jour demandée...');
+  exec('git fetch', (err) => {
+    if (err) {
+      console.error('Erreur git fetch:', err);
+      return res.json({ success: false, error: 'Impossible de joindre GitHub pour vérifier les mises à jour.' });
+    }
+    exec('git status -uno', (err2, stdout) => {
+      if (stdout.includes('Your branch is behind')) {
+        console.log('📥 Mise à jour trouvée ! Lancement du script de mise à jour...');
+        res.json({ success: true, message: 'Mise à jour trouvée. Installation et redémarrage en cours...', updating: true });
+        
+        setTimeout(() => {
+          const launcherPath = path.join(__dirname, 'launcher.ps1');
+          console.log('🚀 Lancement de', launcherPath);
+          const child = spawn('powershell.exe', ['-WindowStyle', 'Hidden', '-ExecutionPolicy', 'Bypass', '-File', launcherPath], {
+            detached: true,
+            stdio: 'ignore'
+          });
+          child.unref();
+          
+          if (discordClient) {
+            try { discordClient.destroy(); } catch (e) {}
+          }
+          console.log('🛑 Fermeture du processus actuel pour laisser le launcher prendre le relais.');
+          process.exit(0);
+        }, 1500);
+      } else {
+        console.log('✅ Application déjà à jour.');
+        res.json({ success: true, message: 'L\'application est déjà à la dernière version.', updating: false });
+      }
+    });
+  });
 });
 
 // Socket.io gestion de connexion
