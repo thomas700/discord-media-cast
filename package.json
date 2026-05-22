@@ -31,13 +31,9 @@
     "productName": "Discord Media Cast",
     "asar": true,
     "win": {
-      "target": "nsis",
-      "icon": "public/icon.ico"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true
+      "target": "portable",
+      "icon": "public/icon.ico",
+      "forceCodeSigning": false
     },
     "publish": {
       "provider": "github",

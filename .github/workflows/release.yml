@@ -1,0 +1,28 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Se déclenche sur les tags comme v1.0.0, v1.1.0, etc.
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Compiler et publier sur GitHub Releases
+        run: npm run release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: false
