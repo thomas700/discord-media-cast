@@ -44,7 +44,7 @@ try {
 # Lancer l'application Electron en arrière-plan
 Write-Log "Lancement de l'application..."
 try {
-    Start-Process -FilePath "npm" -ArgumentList "run", "overlay" -WorkingDirectory $AppDir -WindowStyle Hidden
+    Start-Process -FilePath "npm.cmd" -ArgumentList "run", "overlay" -WorkingDirectory $AppDir -WindowStyle Hidden
     Write-Log "Application lancée avec succès."
 } catch {
     Write-Log "ERREUR au lancement : $_"
