@@ -3,6 +3,12 @@ setlocal EnableDelayedExpansion
 title Discord Media Cast - Installation
 
 :: ============================================================
+:: CONFIGURATION DU BOT DISCORD (A remplir avant d'envoyer aux amis)
+:: ============================================================
+set "DISCORD_TOKEN=VOTRE_TOKEN_ICI"
+set "CHANNEL_ID=VOTRE_CHANNEL_ID_ICI"
+
+:: ============================================================
 :: install.bat - Discord Media Cast
 :: A exécuter UNE SEULE FOIS pour installer l'application.
 :: Double-cliquez dessus et laissez faire !
@@ -93,16 +99,29 @@ if not exist "%INSTALL_DIR%\.env" (
     echo   Configuration du Bot Discord
     echo  --------------------------------------------------------
     echo.
-    echo  Demandez a votre ami Thomas le TOKEN du bot Discord
-    echo  et l'ID du salon a surveiller.
-    echo.
-    set /p DISCORD_TOKEN="  Token du bot Discord : "
-    set /p CHANNEL_ID="  ID du salon Discord   : "
+    
+    set "FINAL_TOKEN=%DISCORD_TOKEN%"
+    set "FINAL_CHANNEL=%CHANNEL_ID%"
+    
+    if "!FINAL_TOKEN!"=="VOTRE_TOKEN_ICI" (
+        echo  Demandez a votre ami Thomas le TOKEN du bot Discord.
+        set /p FINAL_TOKEN="  Token du bot Discord : "
+    ) else (
+        echo        Token Discord pre-configure trouve. OK
+    )
+    
+    if "!FINAL_CHANNEL!"=="VOTRE_CHANNEL_ID_ICI" (
+        echo  Demandez a votre ami Thomas l'ID du salon a surveiller.
+        set /p FINAL_CHANNEL="  ID du salon Discord   : "
+    ) else (
+        echo        ID du salon pre-configure trouve. OK
+    )
+    
     echo.
     (
         echo PORT=3000
-        echo DISCORD_TOKEN=!DISCORD_TOKEN!
-        echo CHANNEL_ID=!CHANNEL_ID!
+        echo DISCORD_TOKEN=!FINAL_TOKEN!
+        echo CHANNEL_ID=!FINAL_CHANNEL!
     ) > "%INSTALL_DIR%\.env"
     echo  Configuration sauvegardee.
 ) else (
