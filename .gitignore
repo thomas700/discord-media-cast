@@ -2,3 +2,5 @@ node_modules/
 dist/
 .env
 *.log
+install_pour_les_amis.bat
+
