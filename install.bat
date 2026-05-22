@@ -92,6 +92,10 @@ if errorlevel 1 (
     exit /b 1
 )
 
+echo        Telechargement et verification du moteur d'affichage...
+call node node_modules/electron/install.js >nul 2>&1
+
+
 :: ---- Configurer le .env (token Discord + salon) ----
 if not exist "%INSTALL_DIR%\.env" (
     echo.
