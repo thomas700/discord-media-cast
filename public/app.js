@@ -791,3 +791,33 @@ function setOverlayPosition(position) {
   }
 }
 
+// ==========================================================================
+// Application Lifecycle
+// ==========================================================================
+
+function quitApplication() {
+  if (confirm("Êtes-vous sûr de vouloir fermer complètement l'application Discord Media Cast ? L'overlay disparaîtra et le bot sera déconnecté.")) {
+    fetch('/api/quit', { method: 'POST' })
+      .then(res => res.json())
+      .then(data => {
+        console.log(data.message);
+        // Fermer la fenêtre si possible, sinon afficher un message
+        document.body.innerHTML = `
+          <div style="display:flex; height:100vh; align-items:center; justify-content:center; flex-direction:column; background:#070913; color:#fff; font-family:Outfit,sans-serif;">
+            <i class="fa-solid fa-power-off" style="font-size: 4rem; color: var(--danger); margin-bottom: 1rem;"></i>
+            <h2>Application fermée</h2>
+            <p style="color: var(--text-muted); margin-top: 1rem;">Vous pouvez fermer cette fenêtre.</p>
+          </div>
+        `;
+        if (window.require) {
+          try {
+            const { ipcRenderer } = require('electron');
+            ipcRenderer.send('quit-app');
+          } catch(e) {}
+        }
+      })
+      .catch(err => console.error("Erreur lors de la fermeture:", err));
+  }
+}
+
+

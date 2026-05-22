@@ -358,6 +358,23 @@ app.get('/api/status', (req, res) => {
   res.json({ botStatus, mediaHistory });
 });
 
+// Route API pour fermer complètement l'application
+app.post('/api/quit', (req, res) => {
+  res.json({ success: true, message: 'Fermeture de l\'application...' });
+  console.log('🛑 Demande de fermeture reçue depuis l\'interface web. Arrêt en cours...');
+  
+  if (discordClient) {
+    try {
+      discordClient.destroy();
+    } catch (e) {}
+  }
+  
+  // Laisser le temps à la réponse de partir avant de tuer le processus
+  setTimeout(() => {
+    process.exit(0);
+  }, 1000);
+});
+
 // Socket.io gestion de connexion
 io.on('connection', (socket) => {
   console.log(`🔌 Nouveau client web connecté [ID: ${socket.id}]`);
