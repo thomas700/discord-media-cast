@@ -14,7 +14,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Charger la position sauvegardée si elle existe
-let savedPosition = 'center';
+let savedPosition = 'top-right';
 const positionFilePath = path.join(__dirname, 'position.json');
 try {
   if (fs.existsSync(positionFilePath)) {
