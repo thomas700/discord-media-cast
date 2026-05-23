@@ -122,22 +122,36 @@ function createOverlay() {
 // Désactiver l'accélération matérielle s'il y a des conflits de rendu (optionnel, mais parfois utile avec certains jeux)
 // app.disableHardwareAcceleration();
 
-app.whenReady().then(() => {
-  // Configurer les mises à jour automatiques
-  setupAutoUpdater();
+const gotTheLock = app.requestSingleInstanceLock();
 
-  // On attend 1,5s pour être sûr que le serveur Express a fini de démarrer
-  setTimeout(createOverlay, 1500);
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createOverlay();
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    // Someone tried to run a second instance, we should focus our window.
+    if (overlayWindow) {
+      if (overlayWindow.isMinimized()) overlayWindow.restore();
+      overlayWindow.focus();
+    }
   });
-});
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-    process.exit(0); // Forcer la fermeture de server.js également
-  }
-});
+  app.whenReady().then(() => {
+    // Configurer les mises à jour automatiques
+    setupAutoUpdater();
+
+    // On attend 1,5s pour être sûr que le serveur Express a fini de démarrer
+    setTimeout(createOverlay, 1500);
+
+    app.on('activate', () => {
+      if (BrowserWindow.getAllWindows().length === 0) createOverlay();
+    });
+  });
+
+  app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') {
+      app.quit();
+      process.exit(0); // Forcer la fermeture de server.js également
+    }
+  });
+}
 

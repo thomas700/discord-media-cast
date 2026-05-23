@@ -44,7 +44,11 @@ try {
 # Lancer l'application Electron en arrière-plan
 Write-Log "Lancement de l'application..."
 try {
-    Start-Process -FilePath "npm.cmd" -ArgumentList "run", "overlay" -WorkingDirectory $AppDir -WindowStyle Hidden
+    Write-Log "PATH: $env:PATH"
+    $npmPath = Get-Command npm.cmd -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source
+    $nodePath = Get-Command node.exe -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source
+    $electronPath = "$AppDir\node_modules\electron\dist\electron.exe"
+    Start-Process -FilePath $electronPath -ArgumentList "overlay.js" -WorkingDirectory $AppDir
     Write-Log "Application lancée avec succès."
 } catch {
     Write-Log "ERREUR au lancement : $_"

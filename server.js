@@ -454,3 +454,12 @@ httpServer.listen(PORT, () => {
   console.log(`🌐 Écran de diffusion accessible sur : http://localhost:${PORT}`);
   console.log(`======================================================\n`);
 });
+
+httpServer.on('error', (e) => {
+  if (e.code === 'EADDRINUSE') {
+    console.error(`❌ Le port ${PORT} est déjà utilisé ! L'application tourne probablement déjà en arrière-plan.`);
+    process.exit(0);
+  } else {
+    console.error('Erreur serveur:', e);
+  }
+});
