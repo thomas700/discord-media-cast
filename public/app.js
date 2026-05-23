@@ -284,7 +284,8 @@ function displayMedia(payload) {
       };
       
       // En overlay, on mute par défaut pour éviter les surprises, et on cache les contrôles
-      if (isOverlay) {
+      const isOverlayMode = document.body.classList.contains('overlay-mode');
+      if (isOverlayMode) {
         displayedVideo.muted = true;
         displayedVideo.removeAttribute('controls');
       } else {
