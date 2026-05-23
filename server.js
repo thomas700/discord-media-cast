@@ -441,8 +441,9 @@ app.post('/api/update', (req, res) => {
           const launcherPath = path.join(__dirname, 'launcher.ps1');
           console.log('🚀 Lancement de', launcherPath);
           
-          // Utilisation de la commande "start" de Windows pour détacher complètement le processus PowerShell
-          exec(`start powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File "${launcherPath}"`);
+          // Lancer updater.vbs via wscript pour un démarrage 100% invisible sans aucun flash de console
+          const updaterPath = path.join(__dirname, 'updater.vbs');
+          exec(`wscript.exe "${updaterPath}"`);
           
           if (discordClient) {
             try { discordClient.destroy(); } catch (e) {}
