@@ -397,11 +397,9 @@ app.post('/api/update', (req, res) => {
         setTimeout(() => {
           const launcherPath = path.join(__dirname, 'launcher.ps1');
           console.log('🚀 Lancement de', launcherPath);
-          const child = spawn('powershell.exe', ['-WindowStyle', 'Hidden', '-ExecutionPolicy', 'Bypass', '-File', launcherPath], {
-            detached: true,
-            stdio: 'ignore'
-          });
-          child.unref();
+          
+          // Utilisation de la commande "start" de Windows pour détacher complètement le processus PowerShell
+          exec(`start powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File "${launcherPath}"`);
           
           if (discordClient) {
             try { discordClient.destroy(); } catch (e) {}
