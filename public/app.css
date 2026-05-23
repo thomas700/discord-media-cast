@@ -6,23 +6,23 @@
 :root {
   --font-family: 'Outfit', sans-serif;
   
-  /* Color Palette - Discord Gray Dark Theme */
-  --bg-dark: #313338;          /* Gris Discord principal */
-  --bg-sidebar: #2b2d31;       /* Gris Discord secondaire */
-  --bg-darker: #1e1f22;        /* Gris Discord très sombre */
-  --bg-glass: rgba(43, 45, 49, 0.7);        /* Translucide gris secondaire */
-  --bg-glass-bright: rgba(49, 51, 56, 0.85); /* Translucide gris principal */
+  /* Color Palette - Discord Ultra-Dark Charcoal Theme */
+  --bg-dark: #111214;          /* Gris charbon très foncé (presque noir / AMOLED) */
+  --bg-sidebar: #1e1f22;       /* Gris Discord secondaire plus sombre */
+  --bg-darker: #0e0f11;        /* Noir carbone profond */
+  --bg-glass: rgba(30, 31, 34, 0.75);        /* Translucide très sombre */
+  --bg-glass-bright: rgba(43, 45, 49, 0.85); /* Translucide gris foncé */
   --border-glass: rgba(255, 255, 255, 0.05);
   --border-active: rgba(88, 101, 242, 0.4);  /* Bordure active Blurple */
   
   --primary: #5865F2;          /* Bleu / Violet Discord (Blurple) */
-  --primary-glow: rgba(88, 101, 242, 0.25);
+  --primary-glow: rgba(88, 101, 242, 0.2);
   --secondary: #23a55a;        /* Vert Discord */
-  --secondary-glow: rgba(35, 165, 90, 0.25);
+  --secondary-glow: rgba(35, 165, 90, 0.2);
   
   --text-main: #dbdee1;        /* Texte actif principal Discord */
   --text-muted: #949ba4;       /* Texte secondaire / muet Discord */
-  --text-dark: #1e1f22;
+  --text-dark: #0e0f11;
   
   --success: #23a55a;          /* Vert succès Discord */
   --warning: #f0b232;          /* Jaune alerte Discord */
@@ -64,7 +64,7 @@ body {
   height: 120%;
   background-size: cover;
   background-position: center;
-  filter: blur(80px) saturate(1.2) opacity(0.15); /* Plus subtil pour s'harmoniser avec le gris */
+  filter: blur(80px) saturate(1.1) opacity(0.12); /* Encore plus subtil et élégant pour le thème ultra-sombre */
   z-index: -2;
   transition: background-image 1.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -75,7 +75,7 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at 50% 50%, rgba(43, 45, 49, 0.3) 0%, var(--bg-dark) 100%);
+  background: radial-gradient(circle at 50% 50%, rgba(30, 31, 34, 0.2) 0%, var(--bg-dark) 100%);
   z-index: -1;
   pointer-events: none;
 }
