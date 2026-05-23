@@ -26,6 +26,8 @@ Set-Location $AppDir
 # Tirer les dernières mises à jour depuis GitHub
 Write-Log "Vérification des mises à jour..."
 try {
+    # Annuler tout changement local pour s'assurer que le pull ne bloque pas (ex: modifications manuelles des fichiers de l'app)
+    & git reset --hard HEAD 2>&1 | Out-Null
     $gitOutput = & git pull 2>&1
     Write-Log "Git pull : $gitOutput"
 } catch {
