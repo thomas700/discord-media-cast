@@ -222,13 +222,38 @@ async function resolveGifUrl(url) {
       
       const html = await response.text();
       
-      // Chercher og:image (balise standard pour la miniature/le GIF animé de prévisualisation)
-      const ogImageMatch = html.match(/<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']/i) 
-                        || html.match(/<meta\s+content=["']([^"']+)["']\s+property=["']og:image["']/i);
+      let imageUrl = null;
       
-      if (ogImageMatch && ogImageMatch[1]) {
-        console.log(`🎯 GIF résolu avec succès : ${ogImageMatch[1]}`);
-        return ogImageMatch[1];
+      // 1. Chercher og:image avec un regex flexible pour supporter class="dynamic" etc.
+      const ogMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i)
+                   || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
+      if (ogMatch && ogMatch[1]) {
+        imageUrl = ogMatch[1];
+      }
+      
+      // 2. Fallback sur twitter:image
+      if (!imageUrl) {
+        const twitterMatch = html.match(/<meta[^>]*name=["']twitter:image["'][^>]*content=["']([^"']+)["']/i)
+                          || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*name=["']twitter:image["']/i);
+        if (twitterMatch && twitterMatch[1]) {
+          imageUrl = twitterMatch[1];
+        }
+      }
+
+      // 3. Fallback sur rel="image_src"
+      if (!imageUrl) {
+        const linkMatch = html.match(/<link[^>]*rel=["']image_src["'][^>]*href=["']([^"']+)["']/i)
+                       || html.match(/<link[^>]*href=["']([^"']+)["'][^>]*rel=["']image_src["']/i);
+        if (linkMatch && linkMatch[1]) {
+          imageUrl = linkMatch[1];
+        }
+      }
+      
+      if (imageUrl) {
+        // Décoder les entités HTML (&amp; -> &)
+        imageUrl = imageUrl.replace(/&amp;/g, '&');
+        console.log(`🎯 GIF résolu avec succès : ${imageUrl}`);
+        return imageUrl;
       }
     }
   } catch (e) {
