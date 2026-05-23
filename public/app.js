@@ -3,7 +3,7 @@
 // Variables globales
 let socket;
 let currentBotStatus = {};
-let currentSettings = { mediaDuration: 5000, textScale: 1.0, ambientGlow: true, overlayPosition: 'top-right' };
+let currentSettings = { mediaDuration: 5000, textScale: 1.0, ambientGlow: true, overlayPosition: 'top-right', windowsStartup: true };
 let mediaHistoryList = [];
 let activeMediaId = null;
 let mediaTimeout = null;
@@ -831,6 +831,12 @@ function applySettings(settings) {
     }
     const toggle = document.getElementById('ambientGlowToggle');
     if (toggle) toggle.checked = settings.ambientGlow;
+  }
+
+  // 5. Démarrage avec Windows
+  if (settings.windowsStartup !== undefined) {
+    const toggle = document.getElementById('windowsStartupToggle');
+    if (toggle) toggle.checked = settings.windowsStartup;
   }
 }
 

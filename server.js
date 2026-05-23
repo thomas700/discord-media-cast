@@ -14,12 +14,53 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Chemin vers le script VBS de démarrage Windows
+const startupVbsPath = path.join(
+  process.env.APPDATA || '',
+  'Microsoft',
+  'Windows',
+  'Start Menu',
+  'Programs',
+  'Startup',
+  'DiscordMediaCast.vbs'
+);
+
+function getStartupStatus() {
+  try {
+    return fs.existsSync(startupVbsPath);
+  } catch (e) {
+    return false;
+  }
+}
+
+function handleWindowsStartup(enable) {
+  try {
+    if (enable) {
+      if (!fs.existsSync(startupVbsPath)) {
+        const launcherScript = path.join(__dirname, 'launcher.ps1');
+        // Créer le script VBS qui lance le launcher PowerShell de manière invisible (0)
+        const vbsContent = `Set WshShell = CreateObject("WScript.Shell")\nWshShell.Run "powershell.exe -ExecutionPolicy Bypass -File ""${launcherScript}""", 0, False\n`;
+        fs.writeFileSync(startupVbsPath, vbsContent, 'utf8');
+        console.log('💻 Démarrage automatique Windows activé (VBS créé).');
+      }
+    } else {
+      if (fs.existsSync(startupVbsPath)) {
+        fs.unlinkSync(startupVbsPath);
+        console.log('💻 Démarrage automatique Windows désactivé (VBS supprimé).');
+      }
+    }
+  } catch (err) {
+    console.error('⚠️ Erreur modification démarrage Windows :', err.message);
+  }
+}
+
 // Charger les paramètres sauvegardés
 let currentSettings = {
   overlayPosition: 'top-right',
   mediaDuration: 5000,
   textScale: 1.0,
-  ambientGlow: true
+  ambientGlow: true,
+  windowsStartup: true
 };
 const settingsFilePath = path.join(__dirname, 'settings.json');
 try {
@@ -31,6 +72,8 @@ try {
 } catch (e) {
   console.warn("⚠️ Impossible de lire les paramètres sauvegardés :", e.message);
 }
+// Toujours synchroniser l'état avec la réalité du système Windows
+currentSettings.windowsStartup = getStartupStatus();
 
 const app = express();
 const httpServer = createServer(app);
@@ -434,6 +477,11 @@ io.on('connection', (socket) => {
     currentSettings = { ...currentSettings, ...newSettings };
     botStatus.settings = currentSettings;
     console.log(`⚙️ Paramètres mis à jour :`, currentSettings);
+
+    // Gérer l'ajout/suppression du démarrage automatique
+    if (newSettings.windowsStartup !== undefined) {
+      handleWindowsStartup(newSettings.windowsStartup);
+    }
     
     // Sauvegarder les paramètres dans le fichier JSON pour qu'ils survivent aux redémarrages
     try {
