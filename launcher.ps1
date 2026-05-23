@@ -43,13 +43,30 @@ try {
     Write-Log "Erreur npm install : $_"
 }
 
+# Vérifier que le binaire Electron est bien installé
+$electronPath = "$AppDir\node_modules\electron\dist\electron.exe"
+if (-not (Test-Path $electronPath)) {
+    Write-Log "Electron manquant ! Téléchargement du binaire..."
+    try {
+        & node "$AppDir\node_modules\electron\install.js" 2>&1 | Out-Null
+        if (Test-Path $electronPath) {
+            Write-Log "Electron téléchargé avec succès."
+        } else {
+            Write-Log "ERREUR : Impossible de télécharger Electron. Vérifiez la connexion internet."
+            exit 1
+        }
+    } catch {
+        Write-Log "ERREUR téléchargement Electron : $_"
+        exit 1
+    }
+}
+
 # Lancer l'application Electron en arrière-plan
 Write-Log "Lancement de l'application..."
 try {
     Write-Log "PATH: $env:PATH"
     $npmPath = Get-Command npm.cmd -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source
     $nodePath = Get-Command node.exe -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source
-    $electronPath = "$AppDir\node_modules\electron\dist\electron.exe"
     Start-Process -FilePath $electronPath -ArgumentList "overlay.js" -WorkingDirectory $AppDir -RedirectStandardOutput "$AppDir\app.log" -RedirectStandardError "$AppDir\app_error.log"
     # Ouvrir le tableau de bord automatiquement après 3 secondes pour laisser le temps au serveur de démarrer
     Start-Sleep -Seconds 3
