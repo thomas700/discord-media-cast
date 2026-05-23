@@ -434,7 +434,8 @@ app.post('/api/update', (req, res) => {
       return res.json({ success: false, error: 'Impossible de joindre GitHub pour vérifier les mises à jour.' });
     }
     exec('git status -uno', (err2, stdout) => {
-      if (stdout.includes('Your branch is behind')) {
+      const isBehind = stdout.includes('Your branch is behind') || stdout.includes('en retard');
+      if (isBehind) {
         console.log('📥 Mise à jour trouvée ! Lancement du script de mise à jour...');
         res.json({ success: true, message: 'Mise à jour trouvée. Installation et redémarrage en cours...', updating: true });
         
