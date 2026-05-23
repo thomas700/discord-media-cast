@@ -50,7 +50,10 @@ try {
     $npmPath = Get-Command npm.cmd -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source
     $nodePath = Get-Command node.exe -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source
     $electronPath = "$AppDir\node_modules\electron\dist\electron.exe"
-    Start-Process -FilePath $electronPath -ArgumentList "overlay.js" -WorkingDirectory $AppDir
+    Start-Process -FilePath $electronPath -ArgumentList "overlay.js" -WorkingDirectory $AppDir -RedirectStandardOutput "$AppDir\app.log" -RedirectStandardError "$AppDir\app_error.log"
+    # Ouvrir le tableau de bord automatiquement après 3 secondes pour laisser le temps au serveur de démarrer
+    Start-Sleep -Seconds 3
+    Start-Process "http://localhost:3000"
     Write-Log "Application lancée avec succès."
 } catch {
     Write-Log "ERREUR au lancement : $_"
