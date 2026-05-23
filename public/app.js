@@ -3,7 +3,7 @@
 // Variables globales
 let socket;
 let currentBotStatus = {};
-let currentSettings = { mediaDuration: 5000, textScale: 1.0, ambientGlow: true, overlayPosition: 'top-right', windowsStartup: true };
+let currentSettings = { mediaDuration: 5000, textScale: 1.0, gifScale: 1.0, ambientGlow: true, overlayPosition: 'top-right', windowsStartup: true };
 let mediaHistoryList = [];
 let activeMediaId = null;
 let mediaTimeout = null;
@@ -819,6 +819,17 @@ function applySettings(settings) {
     if (slider && valDisplay) {
       slider.value = settings.textScale;
       valDisplay.textContent = settings.textScale.toFixed(1) + 'x';
+    }
+  }
+
+  // 3b. Échelle des images & GIFs
+  if (settings.gifScale !== undefined) {
+    document.documentElement.style.setProperty('--gif-scale', settings.gifScale);
+    const slider = document.getElementById('gifScaleSlider');
+    const valDisplay = document.getElementById('gifScaleValue');
+    if (slider && valDisplay) {
+      slider.value = settings.gifScale;
+      valDisplay.textContent = settings.gifScale.toFixed(1) + 'x';
     }
   }
 

@@ -59,6 +59,7 @@ let currentSettings = {
   overlayPosition: 'top-right',
   mediaDuration: 5000,
   textScale: 1.0,
+  gifScale: 1.0,
   ambientGlow: true,
   windowsStartup: true
 };
