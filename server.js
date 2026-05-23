@@ -14,19 +14,22 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Charger la position sauvegardée si elle existe
-let savedPosition = 'top-right';
-const positionFilePath = path.join(__dirname, 'position.json');
+// Charger les paramètres sauvegardés
+let currentSettings = {
+  overlayPosition: 'top-right',
+  mediaDuration: 5000,
+  textScale: 1.0,
+  ambientGlow: true
+};
+const settingsFilePath = path.join(__dirname, 'settings.json');
 try {
-  if (fs.existsSync(positionFilePath)) {
-    const data = JSON.parse(fs.readFileSync(positionFilePath, 'utf8'));
-    if (data && data.position) {
-      savedPosition = data.position;
-      console.log(`💾 Position restaurée depuis la sauvegarde : ${savedPosition}`);
-    }
+  if (fs.existsSync(settingsFilePath)) {
+    const data = JSON.parse(fs.readFileSync(settingsFilePath, 'utf8'));
+    currentSettings = { ...currentSettings, ...data };
+    console.log(`💾 Paramètres restaurés depuis la sauvegarde.`);
   }
 } catch (e) {
-  console.warn("⚠️ Impossible de lire la position sauvegardée :", e.message);
+  console.warn("⚠️ Impossible de lire les paramètres sauvegardés :", e.message);
 }
 
 const app = express();
@@ -54,7 +57,7 @@ let botStatus = {
   error: null,
   botName: null,
   channelName: null,
-  overlayPosition: savedPosition, // Utiliser la position restaurée
+  settings: currentSettings, // Utiliser les paramètres restaurés
   configured: !!(process.env.DISCORD_TOKEN && process.env.CHANNEL_ID)
 };
 
@@ -130,10 +133,12 @@ function initDiscord() {
 
       // Trouver si le message a déjà été traité
       const previousIndex = mediaHistory.findIndex(h => h.id === newMessage.id);
-      const wasTextOnly = previousIndex !== -1 && mediaHistory[previousIndex].media && mediaHistory[previousIndex].media.type === 'text';
+      const prevMedia = previousIndex !== -1 ? mediaHistory[previousIndex].media : null;
+      const wasTextOnly = prevMedia && prevMedia.type === 'text';
+      const wasScraped = prevMedia && prevMedia.isScraped === true;
       
-      // Si non traité, ou si traité mais c'était juste du texte (avant la résolution de l'embed)
-      if (newMessage.embeds && newMessage.embeds.length > 0 && (previousIndex === -1 || wasTextOnly)) {
+      // Si non traité, ou si traité mais c'était juste du texte (ou un scrape instable) avant la résolution de l'embed
+      if (newMessage.embeds && newMessage.embeds.length > 0 && (previousIndex === -1 || wasTextOnly || wasScraped)) {
         console.log(`📩 Message mis à jour avec des embeds dans #${botStatus.channelName}`);
         
         // Retirer l'ancienne version texte de l'historique pour éviter les doublons
@@ -261,7 +266,7 @@ async function processMessage(message) {
       // Tenter de résoudre l'URL de GIF Tenor/Giphy
       const resolvedGif = await resolveGifUrl(firstUrl);
       if (resolvedGif) {
-        payload.media = { type: 'image', url: resolvedGif };
+        payload.media = { type: 'image', url: resolvedGif, isScraped: true };
       } else {
         if (/\.(png|jpg|jpeg|gif|webp|svg)(\?.*)?$/i.test(firstUrl)) {
           payload.media = { type: 'image', url: firstUrl };
@@ -426,21 +431,22 @@ io.on('connection', (socket) => {
     console.log(`❌ Client web déconnecté [ID: ${socket.id}]`);
   });
 
-  // Gérer le changement de position depuis le tableau de bord
-  socket.on('update_position', (position) => {
-    botStatus.overlayPosition = position;
-    console.log(`📍 Position de l'overlay mise à jour: ${position}`);
+  // Gérer la mise à jour des paramètres depuis le tableau de bord
+  socket.on('update_settings', (newSettings) => {
+    currentSettings = { ...currentSettings, ...newSettings };
+    botStatus.settings = currentSettings;
+    console.log(`⚙️ Paramètres mis à jour :`, currentSettings);
     
-    // Sauvegarder la position dans le fichier JSON pour qu'elle survive aux redémarrages
+    // Sauvegarder les paramètres dans le fichier JSON pour qu'ils survivent aux redémarrages
     try {
-      fs.writeFileSync(positionFilePath, JSON.stringify({ position }), 'utf8');
-      console.log(`💾 Position sauvegardée dans le fichier.`);
+      fs.writeFileSync(settingsFilePath, JSON.stringify(currentSettings, null, 2), 'utf8');
+      console.log(`💾 Paramètres sauvegardés dans le fichier.`);
     } catch (e) {
-      console.error("❌ Erreur lors de la sauvegarde de la position :", e.message);
+      console.error("❌ Erreur lors de la sauvegarde des paramètres :", e.message);
     }
 
-    // Diffuser la nouvelle position à tous les autres clients (pour que l'overlay se mette à jour instantanément)
-    io.emit('position_updated', position);
+    // Diffuser les nouveaux paramètres à tous les autres clients (pour que l'overlay se mette à jour instantanément)
+    io.emit('settings_updated', currentSettings);
   });
 });
 

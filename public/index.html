@@ -112,6 +112,9 @@
       <button class="icon-btn" id="btnUpdate" title="Vérifier les mises à jour" onclick="checkForUpdates()">
         <i class="fa-solid fa-arrows-rotate text-success" id="updateIcon"></i>
       </button>
+      <button class="icon-btn" id="btnSettings" title="Paramètres" onclick="toggleSettingsPanel()">
+        <i class="fa-solid fa-gear"></i>
+      </button>
       <button class="icon-btn" id="btnFullscreen" title="Plein Écran" onclick="toggleFullscreen()">
         <i class="fa-solid fa-expand"></i>
       </button>
@@ -154,24 +157,65 @@
           <i class="fa-solid fa-music"></i> Musique (Onde)
         </button>
       </div>
+    </div>
+  </div>
 
-      <div class="form-group" style="margin-top: 1.5rem;">
+  <!-- Settings Panel (Drawer) -->
+  <div class="slide-drawer" id="settingsPanel">
+    <div class="drawer-header">
+      <h3>⚙️ Paramètres</h3>
+      <button class="close-btn" onclick="toggleSettingsPanel()">&times;</button>
+    </div>
+    <div class="drawer-body">
+      <p class="helper-text">Personnalisez l'affichage de votre overlay. Les changements sont appliqués en temps réel.</p>
+      
+      <div class="form-group">
         <label>📍 Position sur l'écran</label>
-        <p class="helper-text" style="margin-top: 0; margin-bottom: 5px;">Cliquez pour déplacer l'affichage de l'overlay.</p>
+        <p class="helper-text" style="margin-top: 0; margin-bottom: 5px;">Déplace l'affichage des médias sur votre stream.</p>
         <div class="position-grid">
-          <button class="pos-btn" onclick="setOverlayPosition('top-left')" title="Haut Gauche" id="pos-top-left"><div class="pos-btn-icon" style="align-self: flex-start; justify-self: flex-start;"></div></button>
-          <button class="pos-btn" onclick="setOverlayPosition('top-center')" title="Haut Centre" id="pos-top-center"><div class="pos-btn-icon" style="align-self: flex-start;"></div></button>
-          <button class="pos-btn active" onclick="setOverlayPosition('top-right')" title="Haut Droite" id="pos-top-right"><div class="pos-btn-icon" style="align-self: flex-start; justify-self: flex-end;"></div></button>
+          <button class="pos-btn" onclick="updateSetting('overlayPosition', 'top-left')" title="Haut Gauche" id="pos-top-left"><div class="pos-btn-icon" style="align-self: flex-start; justify-self: flex-start;"></div></button>
+          <button class="pos-btn" onclick="updateSetting('overlayPosition', 'top-center')" title="Haut Centre" id="pos-top-center"><div class="pos-btn-icon" style="align-self: flex-start;"></div></button>
+          <button class="pos-btn active" onclick="updateSetting('overlayPosition', 'top-right')" title="Haut Droite" id="pos-top-right"><div class="pos-btn-icon" style="align-self: flex-start; justify-self: flex-end;"></div></button>
           
-          <button class="pos-btn" onclick="setOverlayPosition('middle-left')" title="Milieu Gauche" id="pos-middle-left"><div class="pos-btn-icon" style="justify-self: flex-start;"></div></button>
-          <button class="pos-btn" onclick="setOverlayPosition('center')" title="Centre" id="pos-center"><div class="pos-btn-icon"></div></button>
-          <button class="pos-btn" onclick="setOverlayPosition('middle-right')" title="Milieu Droite" id="pos-middle-right"><div class="pos-btn-icon" style="justify-self: flex-end;"></div></button>
+          <button class="pos-btn" onclick="updateSetting('overlayPosition', 'middle-left')" title="Milieu Gauche" id="pos-middle-left"><div class="pos-btn-icon" style="justify-self: flex-start;"></div></button>
+          <button class="pos-btn" onclick="updateSetting('overlayPosition', 'center')" title="Centre" id="pos-center"><div class="pos-btn-icon"></div></button>
+          <button class="pos-btn" onclick="updateSetting('overlayPosition', 'middle-right')" title="Milieu Droite" id="pos-middle-right"><div class="pos-btn-icon" style="justify-self: flex-end;"></div></button>
           
-          <button class="pos-btn" onclick="setOverlayPosition('bottom-left')" title="Bas Gauche" id="pos-bottom-left"><div class="pos-btn-icon" style="align-self: flex-end; justify-self: flex-start;"></div></button>
-          <button class="pos-btn" onclick="setOverlayPosition('bottom-center')" title="Bas Centre" id="pos-bottom-center"><div class="pos-btn-icon" style="align-self: flex-end;"></div></button>
-          <button class="pos-btn" onclick="setOverlayPosition('bottom-right')" title="Bas Droite" id="pos-bottom-right"><div class="pos-btn-icon" style="align-self: flex-end; justify-self: flex-end;"></div></button>
+          <button class="pos-btn" onclick="updateSetting('overlayPosition', 'bottom-left')" title="Bas Gauche" id="pos-bottom-left"><div class="pos-btn-icon" style="align-self: flex-end; justify-self: flex-start;"></div></button>
+          <button class="pos-btn" onclick="updateSetting('overlayPosition', 'bottom-center')" title="Bas Centre" id="pos-bottom-center"><div class="pos-btn-icon" style="align-self: flex-end;"></div></button>
+          <button class="pos-btn" onclick="updateSetting('overlayPosition', 'bottom-right')" title="Bas Droite" id="pos-bottom-right"><div class="pos-btn-icon" style="align-self: flex-end; justify-self: flex-end;"></div></button>
         </div>
       </div>
+
+      <div class="form-group" style="margin-top: 1.5rem;">
+        <label for="mediaDurationSlider">⏱️ Durée d'affichage (Secondes)</label>
+        <p class="helper-text" style="margin-top: 0; margin-bottom: 5px;">Temps pendant lequel les images et textes restent à l'écran.</p>
+        <div class="slider-container">
+          <input type="range" id="mediaDurationSlider" min="2" max="30" value="5" step="1" oninput="updateSetting('mediaDuration', parseInt(this.value) * 1000)">
+          <span class="slider-value" id="mediaDurationValue">5s</span>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top: 1.5rem;">
+        <label for="textScaleSlider">🔎 Échelle du texte</label>
+        <p class="helper-text" style="margin-top: 0; margin-bottom: 5px;">Ajuste la taille globale des textes affichés.</p>
+        <div class="slider-container">
+          <input type="range" id="textScaleSlider" min="0.5" max="2.0" value="1.0" step="0.1" oninput="updateSetting('textScale', parseFloat(this.value))">
+          <span class="slider-value" id="textScaleValue">1.0x</span>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top: 1.5rem;">
+        <label class="toggle-container">
+          <div class="toggle-info">
+            <strong>✨ Effet "Glossy Glow"</strong>
+            <p class="helper-text" style="margin-top: 0; margin-bottom: 0;">Active l'arrière-plan flouté ambiant derrière les médias.</p>
+          </div>
+          <input type="checkbox" id="ambientGlowToggle" checked onchange="updateSetting('ambientGlow', this.checked)">
+          <span class="toggle-slider round"></span>
+        </label>
+      </div>
+
     </div>
   </div>
 

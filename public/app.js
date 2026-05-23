@@ -3,6 +3,7 @@
 // Variables globales
 let socket;
 let currentBotStatus = {};
+let currentSettings = { mediaDuration: 5000, textScale: 1.0, ambientGlow: true, overlayPosition: 'top-right' };
 let mediaHistoryList = [];
 let activeMediaId = null;
 let mediaTimeout = null;
@@ -108,9 +109,9 @@ function initSocket() {
     }
   });
 
-  // Mise à jour de la position de l'overlay par un autre client
-  socket.on('position_updated', (position) => {
-    applyOverlayPosition(position);
+  // Mise à jour des paramètres par un autre client
+  socket.on('settings_updated', (settings) => {
+    applySettings(settings);
   });
 }
 
@@ -156,8 +157,8 @@ function updateBotStatus(status) {
   const statusModalTitle = document.getElementById('statusModalTitle');
   const statusModalDesc = document.getElementById('statusModalDesc');
 
-  if (status.overlayPosition) {
-    applyOverlayPosition(status.overlayPosition);
+  if (status.settings) {
+    applySettings(status.settings);
   }
 
   if (!status.configured) {
@@ -347,9 +348,9 @@ function displayMedia(payload) {
   mediaDisplayContainer.offsetHeight; // déclencher reflow
   mediaDisplayContainer.style.animation = 'mediaEnter 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards';
 
-  // Programmer le masquage automatique du média après 5 secondes (texte/image)
+  // Programmer le masquage automatique du média (texte/image)
   // Pour les vidéos et audios, on donne un timeout de 30 secondes pour les laisser se terminer (onended s'en chargera plus tôt)
-  const timeoutDuration = (mediaType === 'video' || mediaType === 'audio') ? 30000 : 5000;
+  const timeoutDuration = (mediaType === 'video' || mediaType === 'audio') ? 30000 : (currentSettings.mediaDuration || 5000);
   mediaTimeout = setTimeout(() => {
     hideMedia();
   }, timeoutDuration);
@@ -764,30 +765,72 @@ function saveConfig(event) {
 }
 
 // ==========================================================================
-// Overlay Positioning
+// Settings Management
 // ==========================================================================
 
-function applyOverlayPosition(position) {
-  const vp = document.getElementById('theaterViewport');
-  if (vp) {
-    // Reset classes, then add the new position class
-    vp.className = 'theater-viewport';
-    vp.classList.add('pos-' + position);
-  }
+function toggleSettingsPanel() {
+  const panel = document.getElementById('settingsPanel');
+  panel.classList.toggle('open');
+}
 
-  // Update Dashboard Grid UI if present
-  const buttons = document.querySelectorAll('.pos-btn');
-  if (buttons.length > 0) {
-    buttons.forEach(btn => btn.classList.remove('active'));
-    const activeBtn = document.getElementById('pos-' + position);
-    if (activeBtn) activeBtn.classList.add('active');
+function updateSetting(key, value) {
+  if (currentSettings[key] === value) return; // Pas de changement
+  currentSettings[key] = value;
+  applySettings(currentSettings);
+  
+  if (socket) {
+    socket.emit('update_settings', { [key]: value });
   }
 }
 
-function setOverlayPosition(position) {
-  applyOverlayPosition(position);
-  if (socket) {
-    socket.emit('update_position', position);
+function applySettings(settings) {
+  currentSettings = { ...currentSettings, ...settings };
+  
+  // 1. Position de l'overlay
+  if (settings.overlayPosition) {
+    const vp = document.getElementById('theaterViewport');
+    if (vp) {
+      vp.className = 'theater-viewport';
+      vp.classList.add('pos-' + settings.overlayPosition);
+    }
+    const buttons = document.querySelectorAll('.pos-btn');
+    if (buttons.length > 0) {
+      buttons.forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById('pos-' + settings.overlayPosition);
+      if (activeBtn) activeBtn.classList.add('active');
+    }
+  }
+
+  // 2. Durée d'affichage
+  if (settings.mediaDuration !== undefined) {
+    const slider = document.getElementById('mediaDurationSlider');
+    const valDisplay = document.getElementById('mediaDurationValue');
+    if (slider && valDisplay) {
+      slider.value = settings.mediaDuration / 1000;
+      valDisplay.textContent = (settings.mediaDuration / 1000) + 's';
+    }
+  }
+
+  // 3. Échelle du texte
+  if (settings.textScale !== undefined) {
+    document.documentElement.style.setProperty('--text-scale', settings.textScale);
+    const slider = document.getElementById('textScaleSlider');
+    const valDisplay = document.getElementById('textScaleValue');
+    if (slider && valDisplay) {
+      slider.value = settings.textScale;
+      valDisplay.textContent = settings.textScale.toFixed(1) + 'x';
+    }
+  }
+
+  // 4. Glossy Glow (Ambient background)
+  if (settings.ambientGlow !== undefined) {
+    if (settings.ambientGlow) {
+      document.body.classList.remove('no-glow');
+    } else {
+      document.body.classList.add('no-glow');
+    }
+    const toggle = document.getElementById('ambientGlowToggle');
+    if (toggle) toggle.checked = settings.ambientGlow;
   }
 }
 
