@@ -1133,3 +1133,66 @@ body.no-glow .ambient-backdrop,
 body.no-glow .ambient-color-overlay {
   display: none !important;
 }
+
+/* ==========================================================================
+   Fullscreen Layout Modifiers
+   ========================================================================== */
+
+/* Fullscreen mode applied to the viewport */
+.theater-viewport.fullscreen-layout {
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Fullscreen mode applied to the container */
+.media-display-container.fullscreen-layout {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Enlarge media frame to take the entire screen */
+.media-display-container.fullscreen-layout .media-frame {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.media-display-container.fullscreen-layout .media-element {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Fully stretch images and videos in fullscreen mode */
+.media-display-container.fullscreen-layout img,
+.media-display-container.fullscreen-layout video {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  object-fit: contain !important; /* Keep aspect ratio to prevent deformation */
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  animation: none !important; /* Disable floating animations */
+  transform: none !important;
+}

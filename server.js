@@ -264,6 +264,16 @@ async function resolveGifUrl(url) {
 
 // Fonction de parsing et formatage du message (asynchrone pour la résolution de GIF)
 async function processMessage(message) {
+  let isFullscreen = false;
+  let rawContent = message.content || '';
+  let cleanContent = rawContent.trim();
+
+  // Détecter si le message commence par un préfixe de commande slash (ex: /fs, /fullscreen, /)
+  if (cleanContent.startsWith('/')) {
+    isFullscreen = true;
+    cleanContent = cleanContent.replace(/^\/[a-zA-Z]*\s*/i, '');
+  }
+
   const payload = {
     id: message.id,
     timestamp: message.createdAt || new Date(),
@@ -271,7 +281,8 @@ async function processMessage(message) {
       username: message.member ? message.member.displayName : message.author.username,
       avatar: message.author.displayAvatarURL ? message.author.displayAvatarURL({ dynamic: true }) : '/assets/default-avatar.png'
     },
-    content: message.content,
+    content: cleanContent,
+    fullscreen: isFullscreen,
     media: null
   };
 

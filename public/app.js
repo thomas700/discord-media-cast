@@ -246,8 +246,22 @@ function displayMedia(payload) {
   audioPresenter.classList.add('hidden');
   textPresenter.classList.add('hidden');
 
-  // Si c'est du texte brut, l'utilisateur ne veut voir QUE le texte (pas d'en-tête de profil)
-  if (mediaType === 'text') {
+  // Configurer le mode plein écran (fullscreen) sur le viewport et le container
+  const vp = document.getElementById('theaterViewport');
+  if (payload.fullscreen) {
+    vp.classList.add('fullscreen-layout');
+    mediaDisplayContainer.classList.add('fullscreen-layout');
+  } else {
+    vp.classList.remove('fullscreen-layout');
+    mediaDisplayContainer.classList.remove('fullscreen-layout');
+    if (currentSettings.overlayPosition) {
+      vp.className = 'theater-viewport';
+      vp.classList.add('pos-' + currentSettings.overlayPosition);
+    }
+  }
+
+  // Si c'est du texte brut OU si le mode plein écran anonyme est actif, masquer l'en-tête de profil
+  if (mediaType === 'text' || payload.fullscreen) {
     mediaHeader.classList.add('hidden');
   } else {
     mediaHeader.classList.remove('hidden');
@@ -394,6 +408,17 @@ function hideMedia() {
   // Transition douce : retour à l'écran de veille
   mediaDisplayContainer.classList.add('hidden');
   idleScreen.classList.remove('hidden');
+  
+  // Retirer les classes plein écran pour repasser au positionnement normal
+  const vp = document.getElementById('theaterViewport');
+  if (vp) {
+    vp.classList.remove('fullscreen-layout');
+    if (currentSettings.overlayPosition) {
+      vp.className = 'theater-viewport';
+      vp.classList.add('pos-' + currentSettings.overlayPosition);
+    }
+  }
+  mediaDisplayContainer.classList.remove('fullscreen-layout');
   
   // Vider le fond ambiant flouté pour effacer tout filtre ou résidu visuel
   if (ambientBackdrop) {
