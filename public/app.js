@@ -333,9 +333,10 @@ function displayMedia(payload) {
 
   // Afficher la légende textuelle s'il y en a une (en plus de l'image/vidéo/audio)
   if (mediaType !== 'text' && payload.content && payload.content.trim().length > 0) {
-    // Si le contenu n'est pas juste l'URL du média lui-même
-    if (payload.content.trim() !== payload.media.url) {
-      captionText.textContent = payload.content;
+    // Supprimer toutes les URLs (comme les liens Tenor/Giphy) de la légende
+    const cleanContent = payload.content.replace(/https?:\/\/[^\s]+/gi, '').trim();
+    if (cleanContent.length > 0) {
+      captionText.textContent = cleanContent;
       mediaCaption.classList.remove('hidden');
     } else {
       mediaCaption.classList.add('hidden');
@@ -489,10 +490,11 @@ function speakMessage(payload) {
 
   // Texte à prononcer : Auteur + message
   let speechText = '';
+  const cleanContent = payload.content ? payload.content.replace(/https?:\/\/[^\s]+/gi, '').trim() : '';
   if (payload.media.type === 'text') {
     speechText = `${payload.author.username} annonce : ${payload.content}`;
-  } else if (payload.content && payload.content.trim().length > 0 && payload.content.trim() !== payload.media.url) {
-    speechText = `${payload.author.username} dit : ${payload.content}`;
+  } else if (cleanContent.length > 0) {
+    speechText = `${payload.author.username} dit : ${cleanContent}`;
   } else {
     speechText = `Nouveau média de ${payload.author.username}`;
   }

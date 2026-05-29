@@ -27,9 +27,9 @@ Set-Location $AppDir
 Write-Log "Vérification des mises à jour..."
 try {
     # Annuler tout changement local pour s'assurer que le pull ne bloque pas (ex: modifications manuelles des fichiers de l'app)
-    & git reset --hard HEAD 2>&1 | Out-Null
-    $gitOutput = & git pull 2>&1
-    Write-Log "Git pull : $gitOutput"
+    # & git reset --hard HEAD 2>&1 | Out-Null
+    # $gitOutput = & git pull 2>&1
+    # Write-Log "Git pull : $gitOutput"
 } catch {
     Write-Log "Impossible de vérifier les mises à jour (pas de connexion internet ?). Lancement de la version locale."
 }

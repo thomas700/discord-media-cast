@@ -1,0 +1,8 @@
+{
+  "overlayPosition": "center",
+  "mediaDuration": 5000,
+  "textScale": 1.4,
+  "gifScale": 1,
+  "ambientGlow": false,
+  "windowsStartup": true
+}
