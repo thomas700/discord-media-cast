@@ -112,15 +112,25 @@ function createOverlay() {
   // Empêcher la fenêtre de voler le focus de votre jeu (sinon le jeu se minimiserait)
   overlayWindow.setFocusable(false);
 
-  // Maximiser la fenêtre pour couvrir tout l'écran
-  overlayWindow.maximize();
+  // Maximiser la fenêtre pour couvrir tout l'écran (Désactivé car cela peut casser la transparence sous Windows)
+  // overlayWindow.maximize();
+
+  // Rediriger les logs de la console Electron vers la console principale (dans app.log)
+  overlayWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
+    console.log(`[RENDERER CONSOLE] (Niveau: ${level}) ${message} [Fichier: ${sourceId}:${line}]`);
+  });
+
+  // Logguer les échecs de chargement (ex: problème de port, réseau)
+  overlayWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
+    console.error(`❌ Échec du chargement de l'URL par Electron : ${validatedURL}. Erreur : ${errorDescription} (${errorCode})`);
+  });
 
   // Charger notre application locale avec un paramètre pour activer le CSS transparent
   overlayWindow.loadURL('http://localhost:' + (process.env.PORT || 3000) + '/?overlay=true');
 }
 
-// Désactiver l'accélération matérielle s'il y a des conflits de rendu (optionnel, mais parfois utile avec certains jeux)
-// app.disableHardwareAcceleration();
+// Désactiver l'accélération matérielle s'il y a des conflits de rendu (très utile avec la transparence sous Windows)
+app.disableHardwareAcceleration();
 
 const gotTheLock = app.requestSingleInstanceLock();
 
